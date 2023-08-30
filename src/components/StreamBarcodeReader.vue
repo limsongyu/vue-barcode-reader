@@ -157,11 +157,11 @@ export default {
     async findIdealDevice(devices, deviceId = false) {
       let deviceOptions = []
       let cameras = []
-      if (deviceId) {
-        // Specific camera device specified, use this camera if it exists
-        cameras = devices.filter((device) => device.kind === 'videoinput' && device.deviceId === deviceId)
-      }
-      if (cameras?.length !== 1) {
+      // if (deviceId) {
+      //   // Specific camera device specified, use this camera if it exists
+      //   cameras = devices.filter((device) => device.kind === 'videoinput' && device.deviceId === deviceId)
+      // }
+      // if (cameras?.length !== 1) {
         const deviceBlackList = [
           "OBS Virtual Camera",
           "OBS-Camera",
@@ -180,16 +180,25 @@ export default {
           "Stolní kamera"
         ];
         // Filter for the ideal camera
-        cameras = devices.filter((device) => device.kind === 'videoinput' && device.label.toLowerCase().indexOf('front') === -1 && !deviceBlackList.includes(device.label) && !device.label.includes("infrared"))
-        if (cameras?.length === 0) {
-          cameras = devices.filter((device) => device.kind === 'videoinput')
-        }
-      }
+        cameras = devices.filter(({ kind }) => kind === "videoinput")
+        .filter(({ label }) => !deviceBlackList.includes(label))
+        .filter(({ label }) => !label.includes("infrared"));
+        // cameras = devices.filter((device) => device.kind === 'videoinput' && device.label.toLowerCase().indexOf('front') === -1 && !deviceBlackList.includes(device.label) && !device.label.includes("infrared"))
+        // if (cameras?.length === 0) {
+        //   cameras = devices.filter((device) => device.kind === 'videoinput')
+        // }
+      // }
       this.cameraDetails.requestedDeviceId = deviceId
       this.cameraDetails.cameras = devices.filter(device => device.kind === 'videoinput')
       this.cameraDetails.filteredCameras = cameras
       this.cameraDetails.constraints = []
-      const constraints = { video: true }
+      const constraints = {
+        audio: false,
+        video: {
+          width: { min: 360, ideal: 640, max: 1920 },
+          height: { min: 240, ideal: 480, max: 1080 },
+        }
+      };
       if (cameras.length > 2) {
         // Explicitly picking the first entry in the list of all videoinput
         // devices for as the default front camera and the last entry as the default
