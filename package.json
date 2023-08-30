@@ -1,5 +1,5 @@
 {
-  "name": "@limsongyu/vue-barcode-reader",
+  "name": "@teckel/vue-barcode-reader",
   "version": "1.1.2",
   "description": "Vue barcode and QR code scanner",
   "main": "src/index.js",
@@ -16,12 +16,12 @@
     "qrcode",
     "zxing"
   ],
-  "author": "Lim Song Yu <songyu904@gmail.com>",
+  "author": "Tim Eckel <eckel.tim@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/limsongyu/vue-barcode-reader/issues"
+    "url": "https://github.com/teckel12/vue-barcode-reader/issues"
   },
-  "homepage": "https://github.com/limsongyu/vue-barcode-reader#readme",
+  "homepage": "https://github.com/teckel12/vue-barcode-reader#readme",
   "dependencies": {
     "@zxing/library": "^0.20.0"
   },
