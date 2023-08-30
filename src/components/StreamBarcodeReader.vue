@@ -125,6 +125,7 @@ export default {
       return
     }
 
+    localStorage.removeItem('vue-barcode-reader-ideal')
     this.idealDevice = JSON.parse(localStorage.getItem('vue-barcode-reader-ideal') || '{}')
     this.cameraDetails.previousDevice = this.idealDevice
 
