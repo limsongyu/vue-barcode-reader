@@ -188,13 +188,13 @@ export default {
       this.cameraDetails.cameras = devices.filter(device => device.kind === 'videoinput')
       this.cameraDetails.filteredCameras = cameras
       this.cameraDetails.constraints = []
+      const constraints = { video: true }
       if (cameras.length > 2) {
         // Explicitly picking the first entry in the list of all videoinput
         // devices for as the default front camera and the last entry as the default
         // rear camera seems to be a good heuristic on some devices.
         const frontCamera = cameras[0];
         const rearCamera = cameras[cameras.length - 1];
-        const constraints = { video: true }
         constraints.video.deviceId = { exact: rearCamera.deviceId };
       } else {
         constraints.video = { facingMode: { ideal: "environment" } };
