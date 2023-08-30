@@ -144,7 +144,7 @@ export default {
     }
   },
 
-  beforeUnmount() {
+  beforeDestroy() {
     this.isLoading = true
     this.codeReader.reset()
     if (this.landscape) {
@@ -161,8 +161,25 @@ export default {
         cameras = devices.filter((device) => device.kind === 'videoinput' && device.deviceId === deviceId)
       }
       if (cameras?.length !== 1) {
+        const deviceBlackList = [
+          "OBS Virtual Camera",
+          "OBS-Camera",
+          "Desk View Camera",
+          "Schreibtischansicht-Kamera",
+          "Caméra Desk View",
+          "Fotocamera di Panoramica Scrivania",
+          "Rückseitige Ultra-Weitwinkelkamera",
+          "Rückseitige Telefotokamera",
+          "Rückseitige Dual-Weitwinkelkamera",
+          "Rückseitige Triple-Kamera",
+          "Back Dual Wide Camera",
+          "Back Triple Camera",
+          "Back Ultra Wide Camera",
+          "Zadní ultra širokoúhlý fotoaparát",
+          "Stolní kamera"
+        ];
         // Filter for the ideal camera
-        cameras = devices.filter((device) => device.kind === 'videoinput' && device.label.toLowerCase().indexOf('front') === -1)
+        cameras = devices.filter((device) => device.kind === 'videoinput' && device.label.toLowerCase().indexOf('front') === -1 && !deviceBlackList.includes(device.label) && !device.label.includes("infrared"))
         if (cameras?.length === 0) {
           cameras = devices.filter((device) => device.kind === 'videoinput')
         }
@@ -171,33 +188,27 @@ export default {
       this.cameraDetails.cameras = devices.filter(device => device.kind === 'videoinput')
       this.cameraDetails.filteredCameras = cameras
       this.cameraDetails.constraints = []
-      for (let index = 0; index < cameras.length; index++) {
+      if (cameras.length > 2) {
+        // Explicitly picking the first entry in the list of all videoinput
+        // devices for as the default front camera and the last entry as the default
+        // rear camera seems to be a good heuristic on some devices.
+        const frontCamera = cameras[0];
+        const rearCamera = cameras[cameras.length - 1];
         const constraints = { video: true }
-        if (deviceId) {
-          constraints.video = {
-            deviceId: {
-              exact: cameras[index].deviceId,
-            }
-          }
-        } else {
-          constraints.video = { facingMode: 'environment' }
-          if (cameras[index].deviceId) {
-            constraints.video.deviceId = {
-              exact: cameras[index].deviceId,
-            }
-          }
-        }
-        this.cameraDetails.constraints.push(constraints)
-        await navigator.mediaDevices.getUserMedia(constraints)
-          .then(stream => {
-            const track = stream.getVideoTracks()[0]
-            const trackCapabilities = track.getCapabilities()
-            deviceOptions.push(trackCapabilities)
-            stream.getTracks().forEach(track => { track.stop() })
-            return true
-          })
-          .catch(() => { return false })
+        constraints.video.deviceId = { exact: rearCamera.deviceId };
+      } else {
+        constraints.video = { facingMode: { ideal: "environment" } };
       }
+      this.cameraDetails.constraints.push(constraints)
+      await navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+          const track = stream.getVideoTracks()[0]
+          const trackCapabilities = track.getCapabilities()
+          deviceOptions.push(trackCapabilities)
+          stream.getTracks().forEach(track => { track.stop() })
+          return true
+        })
+        .catch(() => { return false })
 
       this.cameraDetails.deviceOptions = deviceOptions
 
